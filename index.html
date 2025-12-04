@@ -7,6 +7,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.5/babel.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -499,6 +503,21 @@
     <div id="root"></div>
 
     <script type="text/babel">
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFP8FTm4VVZYmkI21zS-q1dH-RRCZnEZY",
+            authDomain: "everymango-a3a10.firebaseapp.com",
+            projectId: "everymango-a3a10",
+            storageBucket: "everymango-a3a10.firebasestorage.app",
+            messagingSenderId: "646235082520",
+            appId: "1:646235082520:web:9ac40262c5b188d265d86d"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
         const { useState, useEffect, useMemo, useRef } = React;
 
         // EveryMango Logo Component
@@ -566,6 +585,91 @@
                         transform="rotate(-15, 22, 32)"
                     />
                 </svg>
+            );
+        }
+
+        // Login Screen Component
+        function LoginScreen() {
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState('');
+
+            const handleGoogleSignIn = async () => {
+                setIsLoading(true);
+                setError('');
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    await auth.signInWithPopup(provider);
+                } catch (err) {
+                    console.error('Sign in error:', err);
+                    setError(err.message || 'Failed to sign in. Please try again.');
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center p-8" style={{background: 'linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%)'}}>
+                    <div className="card-gentle shadow-soft-lg p-12 max-w-md w-full text-center">
+                        <div className="flex justify-center mb-6">
+                            <MangoLogo size={80} />
+                        </div>
+                        <h1 className="text-3xl font-bold mb-2" style={{color: 'var(--charcoal)', fontFamily: 'Quicksand, sans-serif'}}>
+                            EveryMango
+                        </h1>
+                        <p className="text-sm mb-8" style={{color: 'var(--warm-gray)'}}>
+                            Ripen at your own pace 🥭
+                        </p>
+                        
+                        <p className="mb-6" style={{color: 'var(--charcoal)'}}>
+                            Gentle project management for ADHD minds
+                        </p>
+
+                        {error && (
+                            <div className="mb-4 p-4 rounded-2xl text-sm" style={{background: 'rgba(232, 93, 74, 0.1)', color: 'var(--warm-red)'}}>
+                                {error}
+                            </div>
+                        )}
+
+                        <button
+                            onClick={handleGoogleSignIn}
+                            disabled={isLoading}
+                            className="w-full px-6 py-4 rounded-2xl font-semibold flex items-center justify-center space-x-3 transition-all hover-lift disabled:opacity-50"
+                            style={{background: 'white', border: '2px solid var(--linen)', color: 'var(--charcoal)'}}
+                        >
+                            {isLoading ? (
+                                <i className="fas fa-spinner fa-spin"></i>
+                            ) : (
+                                <>
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                    <span>Continue with Google</span>
+                                </>
+                            )}
+                        </button>
+
+                        <p className="mt-8 text-xs" style={{color: 'var(--warm-gray)'}}>
+                            Your data is stored securely and syncs across all your devices
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Loading Screen Component
+        function LoadingScreen() {
+            return (
+                <div className="min-h-screen flex items-center justify-center" style={{background: 'var(--cream)'}}>
+                    <div className="text-center">
+                        <MangoLogo size={64} className="mx-auto mb-4" />
+                        <div className="flex items-center justify-center space-x-2">
+                            <i className="fas fa-spinner fa-spin text-2xl" style={{color: 'var(--mango-leaf)'}}></i>
+                            <span className="font-semibold" style={{color: 'var(--charcoal)'}}>Loading your mangoes...</span>
+                        </div>
+                    </div>
+                </div>
             );
         }
 
@@ -730,83 +834,23 @@
 
         // Main App Component
         function App() {
-            const [boards, setBoards] = useState(() => {
-                const saved = localStorage.getItem('everyMangoBoards');
-                if (saved) {
-                    try {
-                        let parsedBoards = JSON.parse(saved);
-                        parsedBoards = parsedBoards.filter(b => b.name !== 'Inbox');
-                        parsedBoards = parsedBoards.map(board => ({
-                            ...board,
-                            groups: board.groups.map(group => ({
-                                ...group,
-                                tasks: group.tasks.map(task => ({
-                                    timeEstimate: '30min',
-                                    energyLevel: 'medium',
-                                    taskType: 'admin',
-                                    isFocusTask: false,
-                                    timeBlock: null,
-                                    contextNotes: '',
-                                    rolloverCount: 0,
-                                    whyItMatters: '',
-                                    reminderTime: null,
-                                    ...task
-                                }))
-                            }))
-                        }));
-                        
-                        const hasBrainDump = parsedBoards.some(b => b.id === 'brain-dump-board');
-                        if (!hasBrainDump) {
-                            const brainDumpBoard = {
-                                id: 'brain-dump-board',
-                                name: 'Brain Dump',
-                                color: '#F4A259',
-                                isPinned: true,
-                                groups: [{
-                                    id: 'brain-dump-group',
-                                    name: 'Captured Thoughts',
-                                    color: '#F4A259',
-                                    tasks: []
-                                }]
-                            };
-                            parsedBoards = [brainDumpBoard, ...parsedBoards];
-                        }
-                        
-                        const hasSomedayMaybe = parsedBoards.some(b => b.id === 'someday-maybe-board');
-                        if (!hasSomedayMaybe) {
-                            const somedayMaybeBoard = {
-                                id: 'someday-maybe-board',
-                                name: 'Someday / Maybe',
-                                color: '#a8c8d8',
-                                isPinned: true,
-                                groups: [{
-                                    id: 'someday-maybe-group',
-                                    name: 'Ideas & Possibilities',
-                                    color: '#a8c8d8',
-                                    tasks: []
-                                }]
-                            };
-                            const brainDumpIndex = parsedBoards.findIndex(b => b.id === 'brain-dump-board');
-                            if (brainDumpIndex >= 0) {
-                                parsedBoards.splice(brainDumpIndex + 1, 0, somedayMaybeBoard);
-                            } else {
-                                parsedBoards = [somedayMaybeBoard, ...parsedBoards];
-                            }
-                        }
-                        
-                        return parsedBoards;
-                    } catch (e) {
-                        console.error('Error loading saved boards:', e);
-                        return initialBoards;
-                    }
-                }
-                return initialBoards;
-            });
+            // Authentication state
+            const [user, setUser] = useState(null);
+            const [authLoading, setAuthLoading] = useState(true);
+
+            // Listen for auth state changes
+            useEffect(() => {
+                const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+                    setUser(firebaseUser);
+                    setAuthLoading(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            const [boards, setBoards] = useState(initialBoards);
+            const [dataLoaded, setDataLoaded] = useState(false);
             
-            const [team, setTeam] = useState(() => {
-                const saved = localStorage.getItem('everyMangoTeam');
-                return saved ? JSON.parse(saved) : initialTeam;
-            });
+            const [team, setTeam] = useState(initialTeam);
             
             const [activeBoard, setActiveBoard] = useState(boards[0]?.id);
             const [view, setView] = useState('board');
@@ -840,6 +884,102 @@
             const [isBreak, setIsBreak] = useState(false);
             const [activeTaskId, setActiveTaskId] = useState(null);
 
+            // Load data from Firestore when user logs in
+            useEffect(() => {
+                if (!user) {
+                    setDataLoaded(false);
+                    return;
+                }
+
+                const loadUserData = async () => {
+                    try {
+                        // Load boards
+                        const boardsDoc = await db.collection('users').doc(user.uid).collection('data').doc('boards').get();
+                        if (boardsDoc.exists) {
+                            const loadedBoards = boardsDoc.data().boards;
+                            let processedBoards = loadedBoards.map(board => ({
+                                ...board,
+                                groups: board.groups.map(group => ({
+                                    ...group,
+                                    tasks: group.tasks.map(task => ({
+                                        timeEstimate: '30min',
+                                        energyLevel: 'medium',
+                                        taskType: 'admin',
+                                        isFocusTask: false,
+                                        timeBlock: null,
+                                        contextNotes: '',
+                                        rolloverCount: 0,
+                                        whyItMatters: '',
+                                        reminderTime: null,
+                                        ...task
+                                    }))
+                                }))
+                            }));
+                            
+                            if (!processedBoards.some(b => b.id === 'brain-dump-board')) {
+                                processedBoards = [initialBoards[0], ...processedBoards];
+                            }
+                            if (!processedBoards.some(b => b.id === 'someday-maybe-board')) {
+                                const brainDumpIndex = processedBoards.findIndex(b => b.id === 'brain-dump-board');
+                                processedBoards.splice(brainDumpIndex + 1, 0, initialBoards[1]);
+                            }
+                            
+                            setBoards(processedBoards);
+                        }
+
+                        const teamDoc = await db.collection('users').doc(user.uid).collection('data').doc('team').get();
+                        if (teamDoc.exists) {
+                            setTeam(teamDoc.data().team);
+                        }
+
+                        setDataLoaded(true);
+                    } catch (error) {
+                        console.error('Error loading data from Firestore:', error);
+                        setDataLoaded(true);
+                    }
+                };
+
+                loadUserData();
+            }, [user]);
+
+            // Save boards to Firestore when they change
+            useEffect(() => {
+                if (!user || !dataLoaded) return;
+                
+                const saveBoards = async () => {
+                    try {
+                        await db.collection('users').doc(user.uid).collection('data').doc('boards').set({
+                            boards: boards,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } catch (error) {
+                        console.error('Error saving boards:', error);
+                    }
+                };
+
+                const timeoutId = setTimeout(saveBoards, 1000);
+                return () => clearTimeout(timeoutId);
+            }, [boards, user, dataLoaded]);
+
+            // Save team to Firestore when it changes
+            useEffect(() => {
+                if (!user || !dataLoaded) return;
+                
+                const saveTeam = async () => {
+                    try {
+                        await db.collection('users').doc(user.uid).collection('data').doc('team').set({
+                            team: team,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } catch (error) {
+                        console.error('Error saving team:', error);
+                    }
+                };
+
+                const timeoutId = setTimeout(saveTeam, 1000);
+                return () => clearTimeout(timeoutId);
+            }, [team, user, dataLoaded]);
+
             useEffect(() => {
                 localStorage.setItem('everyMangoNoJudgmentMode', JSON.stringify(noJudgmentMode));
             }, [noJudgmentMode]);
@@ -852,13 +992,14 @@
                 localStorage.setItem('everyMangoNotificationsEnabled', JSON.stringify(notificationsEnabled));
             }, [notificationsEnabled]);
 
-            useEffect(() => {
-                localStorage.setItem('everyMangoBoards', JSON.stringify(boards));
-            }, [boards]);
+            // Now using Firestore instead of localStorage for boards and team
+            // useEffect(() => {
+            //     localStorage.setItem('everyMangoBoards', JSON.stringify(boards));
+            // }, [boards]);
 
-            useEffect(() => {
-                localStorage.setItem('everyMangoTeam', JSON.stringify(team));
-            }, [team]);
+            // useEffect(() => {
+            //     localStorage.setItem('everyMangoTeam', JSON.stringify(team));
+            // }, [team]);
 
             useEffect(() => {
                 localStorage.setItem('everyMangoRecentlyViewed', JSON.stringify(recentlyViewed));
@@ -1311,6 +1452,17 @@
                 setActiveTaskId(null);
             };
 
+            const handleSignOut = async () => {
+                try {
+                    await auth.signOut();
+                    setBoards(initialBoards);
+                    setTeam(initialTeam);
+                    setDataLoaded(false);
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                }
+            };
+
             const handleBrainDump = () => {
                 if (!brainDumpText.trim()) return;
 
@@ -1356,6 +1508,14 @@
                 });
             };
 
+            if (authLoading) {
+                return <LoadingScreen />;
+            }
+
+            if (!user) {
+                return <LoginScreen />;
+            }
+
             return (
                 <div className={`flex h-screen overflow-hidden ${noJudgmentMode ? 'no-judgment-mode' : ''}`} style={{background: 'var(--cream)'}}>
                     <Sidebar 
@@ -1374,6 +1534,8 @@
                         recentlyViewed={recentlyViewed}
                         overdueTaskCount={overdueTaskCount}
                         rolloverAllOverdue={rolloverAllOverdue}
+                        user={user}
+                        onSignOut={handleSignOut}
                     />
 
                     <main className="flex-1 overflow-hidden flex flex-col">
@@ -1763,7 +1925,7 @@
         }
 
         // Sidebar Component
-        function Sidebar({ boards, activeBoard, setActiveBoard, addBoard, view, setView, sidebarOpen, setSidebarOpen, pomodoroActive, pomodoroTime, isBreak, stopPomodoro, recentlyViewed, overdueTaskCount, rolloverAllOverdue }) {
+        function Sidebar({ boards, activeBoard, setActiveBoard, addBoard, view, setView, sidebarOpen, setSidebarOpen, pomodoroActive, pomodoroTime, isBreak, stopPomodoro, recentlyViewed, overdueTaskCount, rolloverAllOverdue, user, onSignOut }) {
             if (!sidebarOpen) {
                 return (
                     <div className="w-16 flex flex-col items-center py-5 sidebar-gentle" style={{borderRight: '1px solid rgba(255,255,255,0.1)'}}>
@@ -1776,17 +1938,43 @@
 
             return (
                 <aside className="w-64 flex flex-col sidebar-gentle" style={{borderRight: '1px solid rgba(255,255,255,0.1)'}}>
-                    <div className="p-5 border-b flex items-center justify-between" style={{borderColor: 'rgba(255,255,255,0.1)'}}>
-                        <div className="flex items-center">
-                            <MangoLogo size={28} className="mr-2" />
-                            <div>
-                                <h1 className="text-lg font-bold text-white leading-tight">EveryMango</h1>
-                                <p className="tagline text-white">Ripen at your own pace</p>
+                    <div className="p-5 border-b" style={{borderColor: 'rgba(255,255,255,0.1)'}}>
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center">
+                                <MangoLogo size={28} className="mr-2" />
+                                <div>
+                                    <h1 className="text-lg font-bold text-white leading-tight">EveryMango</h1>
+                                    <p className="tagline text-white">Ripen at your own pace</p>
+                                </div>
                             </div>
+                            <button onClick={() => setSidebarOpen(false)} className="hover:bg-white hover:bg-opacity-20 p-2.5 rounded-xl text-white transition-all">
+                                <i className="fas fa-times"></i>
+                            </button>
                         </div>
-                        <button onClick={() => setSidebarOpen(false)} className="hover:bg-white hover:bg-opacity-20 p-2.5 rounded-xl text-white transition-all">
-                            <i className="fas fa-times"></i>
-                        </button>
+                        {user && (
+                            <div className="flex items-center justify-between pt-3" style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                                <div className="flex items-center space-x-2">
+                                    {user.photoURL ? (
+                                        <img src={user.photoURL} alt="" className="w-8 h-8 rounded-full" />
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{background: 'rgba(255,255,255,0.2)'}}>
+                                            <i className="fas fa-user text-white text-sm"></i>
+                                        </div>
+                                    )}
+                                    <span className="text-sm text-white truncate max-w-[120px]" title={user.email}>
+                                        {user.displayName || user.email?.split('@')[0]}
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={onSignOut}
+                                    className="text-xs px-3 py-1.5 rounded-xl transition-all hover:bg-white hover:bg-opacity-20"
+                                    style={{color: 'rgba(255,255,255,0.8)'}}
+                                    title="Sign out"
+                                >
+                                    <i className="fas fa-sign-out-alt"></i>
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Pomodoro Timer */}
